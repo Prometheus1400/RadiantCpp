@@ -10,6 +10,11 @@ Scanner::Scanner(std::string&& source)
     : source(source), line(0), start(0), current(0), error(false), errors() {
 }
 
+Scanner::Scanner(Scanner&& other)
+    : source(std::move(other.source)), line(other.line), start(other.start),
+      current(other.current), error(other.error), errors(other.errors) {
+}
+
 Scanner::~Scanner() {
 }
 
@@ -108,6 +113,17 @@ Token Scanner::getNextToken() {
         return this->stringToken();
     case '\'':
         return this->charToken();
+    default:
+        if (isdigit(c)) {
+            return this->numberToken();
+        } else if (isalpha(c)) {
+            return this->identifierToken();
+        } else {
+            std::stringstream err;
+            err << "unrecognized character [" << c << "]";
+            this->errorAtCurrent(err.str());
+            return Token(ERROR, "", this->line);
+        }
     }
 }
 
@@ -128,6 +144,34 @@ Token Scanner::stringToken() {
         STRING_LIT,
         this->source.substr(this->start + 1, this->current - this->start - 2),
         this->line);
+}
+
+Token Scanner::numberToken() {
+    while (isdigit(this->peek())) {
+        this->advance();
+    }
+    if (this->peek() == '.' && isdigit(this->doublePeek())) {
+        this->advance();
+        while (isdigit(this->peek())) {
+            this->advance();
+        }
+    }
+    return Token(NUMBER_LIT,
+                 this->source.substr(this->start, this->current - this->start),
+                 this->line);
+}
+
+Token Scanner::identifierToken() {
+    while (isalnum(this->peek()) || this->peek() == '_') {
+        this->advance();
+    }
+    std::string word =
+        this->source.substr(this->start, this->current - this->start);
+    if (KEYWORDS.count(word) > 0) {
+        TokenType type = KEYWORDS.at(word);
+        return Token(type, word, this->line);
+    }
+    return Token(IDENTIFIER, word, this->line);
 }
 
 Token Scanner::charToken() {

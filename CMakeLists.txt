@@ -5,6 +5,14 @@ project(Radiant VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# Set default build type to Debug if not specified
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+# Set flags for Debug builds
+set(CMAKE_CXX_FLAGS_DEBUG "-g")  # Generate debug symbols
+
 # Add include directories
 include_directories(include)
 

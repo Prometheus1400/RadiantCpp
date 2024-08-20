@@ -1,6 +1,7 @@
 #include "../include/scanner.h"
 #include <catch2/catch_test_macros.hpp>
 #include <string>
+#include <utility>
 
 TEST_CASE("check scanner can parse basic tokens", "[scanner]") {
     std::string source = "()";
@@ -116,4 +117,46 @@ TEST_CASE("char literal errors", "[scanner]") {
 
     Token t2 = scanner2.getNextToken();
     REQUIRE(scanner2.hadError() == true);
+}
+
+TEST_CASE("number literal", "[scanner]") {
+    std::string source = "123";
+    std::string source2 = "123.456";
+    Scanner scanner(std::move(source));
+    Scanner scanner2(std::move(source2));
+
+    Token t = scanner.getNextToken();
+    REQUIRE(t.type == NUMBER_LIT);
+    REQUIRE(t.lexeme == "123");
+    REQUIRE(t.line == 0);
+
+    Token t2 = scanner2.getNextToken();
+    REQUIRE(t2.type == NUMBER_LIT);
+    REQUIRE(t2.lexeme == "123.456");
+    REQUIRE(t2.line == 0);
+
+    REQUIRE(scanner.hadError() == false);
+}
+
+TEST_CASE("identifiers and keywords", "[scanner]") {
+    std::string source = "return\nelse\nfn";
+    std::string source2 = "myVar myVar2 myVar_3";
+    Scanner scanner(std::move(source));
+    Scanner scanner2(std::move(source2));
+
+    std::vector<std::pair<TokenType, std::string>> expected = {{RETURN, "return"}, {ELSE, "else"}, {FN, "fn"}};
+    for (auto pair : expected) {
+        Token t = scanner.getNextToken();
+        REQUIRE(t.type == pair.first);
+        REQUIRE(t.lexeme == pair.second);
+    }
+
+    std::vector<std::pair<TokenType, std::string>> expected2 = {{IDENTIFIER, "myVar"}, {IDENTIFIER, "myVar2"}, {IDENTIFIER, "myVar_3"}};
+    for (auto pair : expected2) {
+        Token t = scanner2.getNextToken();
+        REQUIRE(t.type == pair.first);
+        REQUIRE(t.lexeme == pair.second);
+    }
+
+    REQUIRE(scanner.hadError() == false);
 }

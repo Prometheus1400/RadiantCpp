@@ -7,9 +7,10 @@
 
 class Lexer {
   public:
-    Lexer(std::string &&source);
+    Lexer(std::string&& source);
     ~Lexer();
-    std::vector<Token>& getTokens();
+    bool scanTokens();
+    std::vector<Token> getTokens();
 
   private:
     Scanner scanner;

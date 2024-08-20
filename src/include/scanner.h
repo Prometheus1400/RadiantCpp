@@ -7,6 +7,7 @@
 class Scanner {
   public:
     Scanner(std::string&& source);
+    Scanner(Scanner&& other);
     ~Scanner();
     Token getNextToken();
     void reportErrors();
@@ -32,6 +33,8 @@ class Scanner {
     void errorAtCurrent(std::string message);
     Token stringToken();
     Token charToken();
+    Token numberToken();
+    Token identifierToken();
 };
 
 #endif

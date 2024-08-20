@@ -63,23 +63,24 @@ enum TokenType {
     special_beg,
     COMMENT,
     EOF_TOKEN,
+    ERROR,
     special_end,
 };
 
-const std::map<std::string, TokenType> keywords = {
-    {"let", LET},
-    {"const", CONST},
-    {"fn", FN},
-    {"return", RETURN},
-    {"if", IF},
-    {"elif", ELIF},
-    {"else", ELSE},
-    {"for", FOR},
-    {"defer", DEFER},
-    {"struct", STRUCT},
-    {"number_type", NUMBER_TYPE},
-    {"bool_type", BOOL_TYPE},
-    {"char_type", CHAR_TYPE},
+const std::map<std::string, TokenType> KEYWORDS = {
+    {"let", TokenType::LET},
+    {"const", TokenType::CONST},
+    {"fn", TokenType::FN},
+    {"return", TokenType::RETURN},
+    {"if", TokenType::IF},
+    {"elif", TokenType::ELIF},
+    {"else", TokenType::ELSE},
+    {"for", TokenType::FOR},
+    {"defer", TokenType::DEFER},
+    {"struct", TokenType::STRUCT},
+    {"number_type", TokenType::NUMBER_TYPE},
+    {"bool_type", TokenType::BOOL_TYPE},
+    {"char_type", TokenType::CHAR_TYPE},
 };
 
 class Token {
