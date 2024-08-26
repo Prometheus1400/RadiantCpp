@@ -19,7 +19,7 @@ include_directories(include)
 # Add source files
 file(GLOB SOURCES "src/*.cpp")
 list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
-# message(STATUS "Found files: ${SOURCES}")
+message(STATUS "Found files: ${SOURCES}")
 
 # Create the executable
 add_executable(Radiant "src/main.cpp" ${SOURCES})

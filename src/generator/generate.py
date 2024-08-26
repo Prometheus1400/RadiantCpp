@@ -1,4 +1,5 @@
 import pathlib
+import re
 from typing import Dict, List, Tuple
 
 STMT_HEADER = (
@@ -27,19 +28,30 @@ def writeHeader(kind: Tuple[str, str], items: Dict[str, str], extra: str, sb: Li
     sb.append(f"class Visit{short} " + "{")
     sb.append("public:")
     for name in items.keys():
-        sb.append(f"virtual void visit{name}{short}({name}{short}* {short.lower()});")
-    sb.append(f"virtual ~Visit{short}() = 0;")
+        sb.append(f"virtual void visit{name}{short}({name}{short}* {short.lower()}) = 0;")
+    sb.append(f"virtual ~Visit{short}() = default;")
     sb.append("};")
     sb.append("")
     sb.append(f"class {short} " + "{")
     sb.append("public:")
-    sb.append(f"virtual void visit(Visit{short} visitor) = 0;")
-    sb.append(f"virtual ~{short}() = 0;")
+    sb.append(f"virtual void visit(Visit{short}* visitor) = 0;")
+    sb.append(f"virtual ~{short}() = default;")
     sb.append("};")
     sb.append("")
     for name, fields in items.items():
-        sb.append(f"class {name}{short} : {short} " + "{")
+        sb.append(f"class {name}{short} : public {short} " + "{")
         sb.append("public:")
+        sb.append(f"~{name}{short}()" + "{};")
+        sb.append(f"{name}{short}() : ")
+        initList = []
+        for field in fields.split(","):
+            fieldType, fieldName = field.strip().split(" ")
+            if re.match("std::unique_ptr<.*>", fieldType) is not None:
+                initList.append(f"{fieldName}(nullptr)")
+            # if "std::unique_ptr" in fieldType:
+            else:
+                initList.append(f"{fieldName}()")
+        sb.append(",".join(initList) + "{}")
         for field in fields.split(","):
             field = field.strip()
             sb.append(f"{field};")
@@ -77,10 +89,10 @@ def main():
         f.write("\n".join(stmtStringBuilder))
 
     exprs = {
-        "Number": "std::string value",
+        "Number": "double value",
         "String": "std::string value",
         "Char": "std::string value",
-        "Bool": "std::string value",
+        "Bool": "bool value",
         "Identifier": "Token value",
         "Binary": "std::unique_ptr<Expr> left, Token oper, std::unique_ptr<Expr> right",
         "Unary": "Token oper, std::unique_ptr<Expr> right",

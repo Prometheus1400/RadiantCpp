@@ -83,8 +83,8 @@ const std::map<std::string, TokenType> KEYWORDS = {
     {"char_type", TokenType::CHAR_TYPE},
 };
 
-class Token {
-  public:
+struct Token {
+    Token();
     Token(TokenType type, std::string lexeme, int line);
     ~Token();
 

@@ -27,6 +27,34 @@ TEST_CASE("check scanner can parse basic tokens", "[scanner]") {
     REQUIRE(scanner.hadError() == false);
 }
 
+TEST_CASE("check scanner can parse basic expression", "[scanner]") {
+    std::string source = "3 + 5;";
+    Scanner scanner(std::move(source));
+
+    Token t1 = scanner.getNextToken();
+    REQUIRE(t1.type == NUMBER_LIT);
+    REQUIRE(t1.line == 0);
+    REQUIRE(t1.lexeme == "3");
+
+    Token t2 = scanner.getNextToken();
+    REQUIRE(t2.type == PLUS);
+    REQUIRE(t2.line == 0);
+    REQUIRE(t2.lexeme == "+");
+
+    Token t3 = scanner.getNextToken();
+    REQUIRE(t3.type == NUMBER_LIT);
+    REQUIRE(t3.line == 0);
+    REQUIRE(t3.lexeme == "5");
+
+    Token t4 = scanner.getNextToken();
+    REQUIRE(t4.type == SEMI_COLON);
+    REQUIRE(t4.line == 0);
+    REQUIRE(t4.lexeme == ";");
+
+
+    REQUIRE(scanner.hadError() == false);
+}
+
 TEST_CASE("check scanner can parse basic tokens and keeps track of changing "
           "line number",
           "[scanner]") {

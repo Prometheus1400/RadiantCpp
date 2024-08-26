@@ -7,11 +7,11 @@
 #include "expressions.h"
 struct Type {
     Token token;
-    bool isPointer;
+    bool  isPointer;
 };
 struct Param {
     Token name;
-    Type type;
+    Type  type;
 };
 
 class BlockStmt;
@@ -23,69 +23,87 @@ class IfStmt;
 
 class VisitStmt {
   public:
-    virtual void visitBlockStmt(BlockStmt* stmt);
-    virtual void visitVarStmt(VarStmt* stmt);
-    virtual void visitFnStmt(FnStmt* stmt);
-    virtual void visitExpressionStmt(ExpressionStmt* stmt);
-    virtual void visitReturnStmt(ReturnStmt* stmt);
-    virtual void visitIfStmt(IfStmt* stmt);
-    virtual ~VisitStmt() = 0;
+    virtual void visitBlockStmt(BlockStmt* stmt)           = 0;
+    virtual void visitVarStmt(VarStmt* stmt)               = 0;
+    virtual void visitFnStmt(FnStmt* stmt)                 = 0;
+    virtual void visitExpressionStmt(ExpressionStmt* stmt) = 0;
+    virtual void visitReturnStmt(ReturnStmt* stmt)         = 0;
+    virtual void visitIfStmt(IfStmt* stmt)                 = 0;
+    virtual ~VisitStmt()                                   = default;
 };
 
 class Stmt {
   public:
-    virtual void visit(VisitStmt visitor) = 0;
-    virtual ~Stmt() = 0;
+    virtual void visit(VisitStmt* visitor) = 0;
+    virtual ~Stmt()                        = default;
 };
 
-class BlockStmt : Stmt {
+class BlockStmt : public Stmt {
   public:
-    std::vector<Stmt*> body;
-    void visit(VisitStmt* visitor) {
+    ~BlockStmt(){};
+    BlockStmt() : body() {
+    }
+    std::vector<std::unique_ptr<Stmt>> body;
+    void                               visit(VisitStmt* visitor) {
         visitor->visitBlockStmt(this);
     }
 };
-class VarStmt : Stmt {
+class VarStmt : public Stmt {
   public:
-    Token name;
-    Type type;
-    Expr* initializer;
-    void visit(VisitStmt* visitor) {
+    ~VarStmt(){};
+    VarStmt() : name(), type(), initializer(nullptr) {
+    }
+    Token                 name;
+    Type                  type;
+    std::unique_ptr<Expr> initializer;
+    void                  visit(VisitStmt* visitor) {
         visitor->visitVarStmt(this);
     }
 };
-class FnStmt : Stmt {
+class FnStmt : public Stmt {
   public:
-    Token name;
-    std::vector<Param> params;
-    Stmt* body;
-    Type returnType;
-    void visit(VisitStmt* visitor) {
+    ~FnStmt(){};
+    FnStmt() : name(), params(), body(nullptr), returnType() {
+    }
+    Token                 name;
+    std::vector<Param>    params;
+    std::unique_ptr<Stmt> body;
+    Type                  returnType;
+    void                  visit(VisitStmt* visitor) {
         visitor->visitFnStmt(this);
     }
 };
-class ExpressionStmt : Stmt {
+class ExpressionStmt : public Stmt {
   public:
-    Expr* expression;
-    void visit(VisitStmt* visitor) {
+    ~ExpressionStmt(){};
+    ExpressionStmt() : expression(nullptr) {
+    }
+    std::unique_ptr<Expr> expression;
+    void                  visit(VisitStmt* visitor) {
         visitor->visitExpressionStmt(this);
     }
 };
-class ReturnStmt : Stmt {
+class ReturnStmt : public Stmt {
   public:
-    Expr* expression;
-    void visit(VisitStmt* visitor) {
+    ~ReturnStmt(){};
+    ReturnStmt() : expression(nullptr) {
+    }
+    std::unique_ptr<Expr> expression;
+    void                  visit(VisitStmt* visitor) {
         visitor->visitReturnStmt(this);
     }
 };
-class IfStmt : Stmt {
+class IfStmt : public Stmt {
   public:
-    Expr* ifCondition;
-    Stmt* ifBlock;
-    std::vector<Expr> elifConditions;
-    std::vector<Stmt> elifBlocks;
-    Stmt* elseBlock;
-    void visit(VisitStmt* visitor) {
+    ~IfStmt(){};
+    IfStmt() : ifCondition(nullptr), ifBlock(nullptr), elifConditions(), elifBlocks(), elseBlock(nullptr) {
+    }
+    std::unique_ptr<Expr> ifCondition;
+    std::unique_ptr<Stmt> ifBlock;
+    std::vector<Expr>     elifConditions;
+    std::vector<Stmt>     elifBlocks;
+    std::unique_ptr<Stmt> elseBlock;
+    void                  visit(VisitStmt* visitor) {
         visitor->visitIfStmt(this);
     }
 };

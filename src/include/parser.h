@@ -8,8 +8,8 @@
 #include <memory>
 
 class Parser {
-    using PrefixRule = Expr* (*)(/* parameters */);
-    using InfixRule  = Expr* (*)(/* parameters */);
+    using PrefixRule = std::unique_ptr<Expr>(Parser::*)();
+    using InfixRule  = std::unique_ptr<Expr>(Parser::*)(std::unique_ptr<Expr> left);
 
   public:
     Parser(std::string&& source);
@@ -45,6 +45,25 @@ class Parser {
         Precedence precedence;
     } parseRule;
     std::map<TokenType, ParseRule>   parseTable;
+    // actual parse methods
+    std::unique_ptr<Stmt> declaration();
+    std::unique_ptr<Stmt> statement();
+    std::unique_ptr<Stmt> varDeclaration();
+    std::unique_ptr<Stmt> fnDeclaration();
+    std::unique_ptr<Stmt> ifStmt();
+    std::unique_ptr<Stmt> blockStmt();
+    std::unique_ptr<Stmt> returnStmt();
+    std::unique_ptr<Stmt> expressionStmt();
+    std::unique_ptr<Expr> expression();
+    std::unique_ptr<Expr> prattParse(Precedence precedence);
+    std::unique_ptr<Expr> grouping();
+    std::unique_ptr<Expr> number();
+    std::unique_ptr<Expr> character();
+    std::unique_ptr<Expr> boolean();
+    std::unique_ptr<Expr> variable();
+    std::unique_ptr<Expr> binary(std::unique_ptr<Expr> left);
+    std::unique_ptr<Expr> unary();
+    // parse helpers
     Token                            advance();
     Token                            peek();
     Token                            prev();
