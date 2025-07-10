@@ -7,7 +7,7 @@
 #include <string>
 
 Scanner::Scanner(std::string&& source)
-    : source(source), line(0), start(0), current(0), error(false), errors() {
+    : source(std::move(source)), line(0), start(0), current(0), error(false), errors() {
 }
 
 Scanner::Scanner(Scanner&& other)

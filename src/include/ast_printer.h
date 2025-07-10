@@ -7,7 +7,7 @@
 #include <vector>
 #include <sstream>
 
-class ASTPrinter : public VisitStmt, public VisitExpr {
+class ASTPrinter : public VisitStmt, public VisitExpr<void> {
   public:
     ASTPrinter() {}
     /* ~ASTPrinter() {}; */

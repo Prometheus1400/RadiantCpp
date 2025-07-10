@@ -39,3 +39,25 @@ TEST_CASE("check parser works with grouping expression", "[parser]") {
     REQUIRE(stmts.size() == 2);
     REQUIRE(printer.print(stmts) == expected);
 }
+
+TEST_CASE("check parser works on identifiers", "[parser]") {
+    Parser parser("myVar + 2;");
+    ASTPrinter     printer;
+    vector<string> expected = {"(myVar+2)"};
+
+    parser.parse();
+    const auto& stmts = parser.getStatements();
+    REQUIRE(stmts.size() == 1);
+    REQUIRE(printer.print(stmts) == expected);
+}
+
+TEST_CASE("check parser works on variable declarations", "[parser]") {
+    Parser parser("let x int*[] = other_val; let y int = 5;");
+    ASTPrinter     printer;
+    vector<string> expected = {"let x:int:1:1 = other_val", "let y:int:0:0 = 5"};
+
+    parser.parse();
+    const auto& stmts = parser.getStatements();
+    REQUIRE(stmts.size() == 2);
+    REQUIRE(printer.print(stmts) == expected);
+}

@@ -57,6 +57,7 @@ enum TokenType {
     NUMBER_TYPE,
     BOOL_TYPE,
     CHAR_TYPE,
+    AUTO_TYPE,
     ARRAY_TYPE, // '[]' is a modifier after type like 'int[]'
     types_end,
 
@@ -64,6 +65,7 @@ enum TokenType {
     COMMENT,
     EOF_TOKEN,
     ERROR,
+    TYPE,
     special_end,
 };
 
@@ -78,9 +80,10 @@ const std::map<std::string, TokenType> KEYWORDS = {
     {"for", TokenType::FOR},
     {"defer", TokenType::DEFER},
     {"struct", TokenType::STRUCT},
-    {"number_type", TokenType::NUMBER_TYPE},
-    {"bool_type", TokenType::BOOL_TYPE},
-    {"char_type", TokenType::CHAR_TYPE},
+    {"number", TokenType::NUMBER_TYPE},
+    {"bool", TokenType::BOOL_TYPE},
+    {"char", TokenType::CHAR_TYPE},
+    // {"auto", TokenType::AUTO_TYPE} // in practice this is not used but constructed by parser
 };
 
 struct Token {

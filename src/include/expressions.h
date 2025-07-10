@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <llvm/IR/Value.h>
+
 class NumberExpr;
 class StringExpr;
 class CharExpr;
@@ -14,24 +16,25 @@ class UnaryExpr;
 class GroupingExpr;
 class CallExpr;
 
-class VisitExpr {
+template <class T> class VisitExpr {
   public:
-    virtual void visitNumberExpr(NumberExpr* expr)         = 0;
-    virtual void visitStringExpr(StringExpr* expr)         = 0;
-    virtual void visitCharExpr(CharExpr* expr)             = 0;
-    virtual void visitBoolExpr(BoolExpr* expr)             = 0;
-    virtual void visitIdentifierExpr(IdentifierExpr* expr) = 0;
-    virtual void visitBinaryExpr(BinaryExpr* expr)         = 0;
-    virtual void visitUnaryExpr(UnaryExpr* expr)           = 0;
-    virtual void visitGroupingExpr(GroupingExpr* expr)     = 0;
-    virtual void visitCallExpr(CallExpr* expr)             = 0;
-    virtual ~VisitExpr()                                   = default;
+    virtual T visitNumberExpr(NumberExpr* expr)         = 0;
+    virtual T visitStringExpr(StringExpr* expr)         = 0;
+    virtual T visitCharExpr(CharExpr* expr)             = 0;
+    virtual T visitBoolExpr(BoolExpr* expr)             = 0;
+    virtual T visitIdentifierExpr(IdentifierExpr* expr) = 0;
+    virtual T visitBinaryExpr(BinaryExpr* expr)         = 0;
+    virtual T visitUnaryExpr(UnaryExpr* expr)           = 0;
+    virtual T visitGroupingExpr(GroupingExpr* expr)     = 0;
+    virtual T visitCallExpr(CallExpr* expr)             = 0;
+    virtual ~VisitExpr()                                = default;
 };
 
 class Expr {
   public:
-    virtual void visit(VisitExpr* visitor) = 0;
-    virtual ~Expr()                        = default;
+    virtual void         visit(VisitExpr<void>* visitor)         = 0;
+    virtual llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) = 0;
+    virtual ~Expr()                                              = default;
 };
 
 class NumberExpr : public Expr {
@@ -40,8 +43,11 @@ class NumberExpr : public Expr {
     NumberExpr() : value() {
     }
     double value;
-    void   visit(VisitExpr* visitor) {
+    void   visit(VisitExpr<void>* visitor) {
         visitor->visitNumberExpr(this);
+    }
+    llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) {
+        return visitor->visitNumberExpr(this);
     }
 };
 class StringExpr : public Expr {
@@ -50,8 +56,11 @@ class StringExpr : public Expr {
     StringExpr() : value() {
     }
     std::string value;
-    void        visit(VisitExpr* visitor) {
+    void        visit(VisitExpr<void>* visitor) {
         visitor->visitStringExpr(this);
+    }
+    llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) {
+        return visitor->visitStringExpr(this);
     }
 };
 class CharExpr : public Expr {
@@ -60,8 +69,11 @@ class CharExpr : public Expr {
     CharExpr() : value() {
     }
     std::string value;
-    void        visit(VisitExpr* visitor) {
+    void        visit(VisitExpr<void>* visitor) {
         visitor->visitCharExpr(this);
+    }
+    llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) {
+        return visitor->visitCharExpr(this);
     }
 };
 class BoolExpr : public Expr {
@@ -70,8 +82,11 @@ class BoolExpr : public Expr {
     BoolExpr() : value() {
     }
     bool value;
-    void visit(VisitExpr* visitor) {
+    void visit(VisitExpr<void>* visitor) {
         visitor->visitBoolExpr(this);
+    }
+    llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) {
+        return visitor->visitBoolExpr(this);
     }
 };
 class IdentifierExpr : public Expr {
@@ -80,8 +95,11 @@ class IdentifierExpr : public Expr {
     IdentifierExpr() : value() {
     }
     Token value;
-    void  visit(VisitExpr* visitor) {
+    void  visit(VisitExpr<void>* visitor) {
         visitor->visitIdentifierExpr(this);
+    }
+    llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) {
+        return visitor->visitIdentifierExpr(this);
     }
 };
 class BinaryExpr : public Expr {
@@ -92,8 +110,11 @@ class BinaryExpr : public Expr {
     std::unique_ptr<Expr> left;
     Token                 oper;
     std::unique_ptr<Expr> right;
-    void                  visit(VisitExpr* visitor) {
+    void                  visit(VisitExpr<void>* visitor) {
         visitor->visitBinaryExpr(this);
+    }
+    llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) {
+        return visitor->visitBinaryExpr(this);
     }
 };
 class UnaryExpr : public Expr {
@@ -103,8 +124,11 @@ class UnaryExpr : public Expr {
     }
     Token                 oper;
     std::unique_ptr<Expr> right;
-    void                  visit(VisitExpr* visitor) {
+    void                  visit(VisitExpr<void>* visitor) {
         visitor->visitUnaryExpr(this);
+    }
+    llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) {
+        return visitor->visitUnaryExpr(this);
     }
 };
 class GroupingExpr : public Expr {
@@ -113,8 +137,11 @@ class GroupingExpr : public Expr {
     GroupingExpr() : expression(nullptr) {
     }
     std::unique_ptr<Expr> expression;
-    void                  visit(VisitExpr* visitor) {
+    void                  visit(VisitExpr<void>* visitor) {
         visitor->visitGroupingExpr(this);
+    }
+    llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) {
+        return visitor->visitGroupingExpr(this);
     }
 };
 class CallExpr : public Expr {
@@ -124,8 +151,11 @@ class CallExpr : public Expr {
     }
     std::unique_ptr<Expr> callee;
     std::vector<Expr>     args;
-    void                  visit(VisitExpr* visitor) {
+    void                  visit(VisitExpr<void>* visitor) {
         visitor->visitCallExpr(this);
+    }
+    llvm::Value* visit(VisitExpr<llvm::Value*>* visitor) {
+        return visitor->visitCallExpr(this);
     }
 };
 

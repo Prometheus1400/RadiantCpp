@@ -1,13 +1,13 @@
 #include "include/ast_printer.h"
 #include <iostream>
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
-using std::vector;
 using std::string;
-using std::unique_ptr;
 using std::stringstream;
+using std::unique_ptr;
+using std::vector;
 
 vector<string> ASTPrinter::print(const vector<unique_ptr<Stmt>>& stmts) {
     vector<string> lines;
@@ -19,22 +19,34 @@ vector<string> ASTPrinter::print(const vector<unique_ptr<Stmt>>& stmts) {
     return lines;
 }
 
-void ASTPrinter::visitBlockStmt(BlockStmt* stmt) {}
-void ASTPrinter::visitVarStmt(VarStmt* stmt) {}
-void ASTPrinter::visitFnStmt(FnStmt* stmt) {}
+void ASTPrinter::visitBlockStmt(BlockStmt* stmt) {
+}
+void ASTPrinter::visitVarStmt(VarStmt* stmt) {
+    this->ss << "let " << stmt->name.lexeme << ":" << stmt->type.token.lexeme << ":" << stmt->type.isPointer << ":" << stmt->type.isArray << " = ";
+    stmt->initializer->visit(this);
+}
+void ASTPrinter::visitFnStmt(FnStmt* stmt) {
+}
 void ASTPrinter::visitExpressionStmt(ExpressionStmt* stmt) {
     stmt->expression->visit(this);
 }
-void ASTPrinter::visitReturnStmt(ReturnStmt* stmt) {}
-void ASTPrinter::visitIfStmt(IfStmt* stmt) {}
+void ASTPrinter::visitReturnStmt(ReturnStmt* stmt) {
+}
+void ASTPrinter::visitIfStmt(IfStmt* stmt) {
+}
 
 void ASTPrinter::visitNumberExpr(NumberExpr* expr) {
     this->ss << expr->value;
 }
-void ASTPrinter::visitStringExpr(StringExpr* expr) {}
-void ASTPrinter::visitCharExpr(CharExpr* expr) {}
-void ASTPrinter::visitBoolExpr(BoolExpr* expr) {}
-void ASTPrinter::visitIdentifierExpr(IdentifierExpr* expr) {}
+void ASTPrinter::visitStringExpr(StringExpr* expr) {
+}
+void ASTPrinter::visitCharExpr(CharExpr* expr) {
+}
+void ASTPrinter::visitBoolExpr(BoolExpr* expr) {
+}
+void ASTPrinter::visitIdentifierExpr(IdentifierExpr* expr) {
+    this->ss << expr->value.lexeme;
+}
 void ASTPrinter::visitBinaryExpr(BinaryExpr* expr) {
     this->ss << "(";
     expr->left->visit(this);
@@ -47,8 +59,7 @@ void ASTPrinter::visitUnaryExpr(UnaryExpr* expr) {
     expr->right->visit(this);
 }
 void ASTPrinter::visitGroupingExpr(GroupingExpr* expr) {
-    /* this->ss << "("; */
     expr->expression->visit(this);
-    /* this->ss << ")"; */
 }
-void ASTPrinter::visitCallExpr(CallExpr* expr) {}
+void ASTPrinter::visitCallExpr(CallExpr* expr) {
+}

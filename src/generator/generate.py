@@ -25,16 +25,30 @@ def writeHeader(kind: Tuple[str, str], items: Dict[str, str], extra: str, sb: Li
     for name in items.keys():
         sb.append(f"class {name}{short};")
     sb.append("")
-    sb.append(f"class Visit{short} " + "{")
+    if short.lower() == "expr":
+        sb.append(f"template<class T> class Visit{short} " + "{")
+    else:
+        sb.append(f"class Visit{short} " + "{")
     sb.append("public:")
     for name in items.keys():
-        sb.append(f"virtual void visit{name}{short}({name}{short}* {short.lower()}) = 0;")
+        if short.lower() == "expr":
+            sb.append(
+                f"virtual T visit{name}{short}({name}{short}* {short.lower()}) = 0;"
+            )
+        else:
+            sb.append(
+                f"virtual void visit{name}{short}({name}{short}* {short.lower()}) = 0;"
+            )
     sb.append(f"virtual ~Visit{short}() = default;")
     sb.append("};")
     sb.append("")
     sb.append(f"class {short} " + "{")
     sb.append("public:")
-    sb.append(f"virtual void visit(Visit{short}* visitor) = 0;")
+    if short.lower() == "expr":
+        sb.append(f"virtual void visit(Visit{short}<void>* visitor) = 0;")
+        sb.append(f"virtual llvm::Value* visit(Visit{short}<llvm::Value*>* visitor) = 0;")
+    else:
+        sb.append(f"virtual void visit(Visit{short}* visitor) = 0;")
     sb.append(f"virtual ~{short}() = default;")
     sb.append("};")
     sb.append("")
@@ -55,9 +69,16 @@ def writeHeader(kind: Tuple[str, str], items: Dict[str, str], extra: str, sb: Li
         for field in fields.split(","):
             field = field.strip()
             sb.append(f"{field};")
-        sb.append(f"void visit(Visit{short}* visitor) " + "{")
+        if short.lower() == "expr":
+            sb.append(f"void visit(Visit{short}<void>* visitor) " + "{")
+        else:
+            sb.append(f"void visit(Visit{short}* visitor) " + "{")
         sb.append(f"visitor->visit{name}{short}(this);")
         sb.append("}")
+        if short.lower() == "expr":
+            sb.append(f"llvm::Value* visit(Visit{short}<llvm::Value*>* visitor)" + "{")
+            sb.append(f"return visitor->visit{name}{short}(this);")
+            sb.append("}")
         sb.append("};")
     sb.append("")
     sb.append("#endif")
@@ -77,6 +98,7 @@ def main():
     struct Type {
         Token token;
         bool isPointer;
+        bool isArray;
     };
     struct Param {
         Token name;
@@ -99,8 +121,11 @@ def main():
         "Grouping": "std::unique_ptr<Expr> expression",
         "Call": "std::unique_ptr<Expr> callee, std::vector<Expr> args",
     }
+    extra = """
+    #include <llvm/IR/Value.h>
+    """
     exprStringBuilder = []
-    writeHeader(("Expr", "Expressions"), exprs, "", exprStringBuilder)
+    writeHeader(("Expr", "Expressions"), exprs, extra, exprStringBuilder)
     with open(EXPR_HEADER, "w") as f:
         f.write("\n".join(exprStringBuilder))
 

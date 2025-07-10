@@ -106,8 +106,31 @@ unique_ptr<Stmt> Parser::statement() {
 }
 
 unique_ptr<Stmt> Parser::varDeclaration() {
-    // TODO:
-    return nullptr;
+    Token name = this->consume(IDENTIFIER, "expect variable name");
+    Type  type;
+    type.token     = Token(AUTO_TYPE, "", name.line);
+    type.isPointer = false;
+    if (this->match(NUMBER_TYPE, BOOL_TYPE, CHAR_TYPE, IDENTIFIER)) {
+        type.token = this->prev();
+    }
+    if (this->match(STAR)) {
+        type.isPointer = true;
+    }
+    if (this->match(ARRAY_TYPE)) {
+        type.isArray = true;
+    }
+    unique_ptr<Expr> initializer = nullptr;
+    if (this->match(ASSIGN)) {
+        initializer = std::move(this->expression());
+    }
+
+    this->consume(SEMI_COLON, "expect semicolon after variable declaration");
+
+    unique_ptr<VarStmt> stmt = std::make_unique<VarStmt>();
+    stmt->name               = name;
+    stmt->type               = type;
+    stmt->initializer        = std::move(initializer);
+    return stmt;
 }
 
 unique_ptr<Stmt> Parser::fnDeclaration() {
@@ -228,7 +251,11 @@ bool Parser::check(TokenType type) {
     return this->peek().type == type;
 }
 template <typename... Args> bool Parser::match(Args... args) {
-    return (... || (this->check(args)));
+    bool result = (... || (this->check(args)));
+    if (result) {
+        this->advance();
+    }
+    return result;
 }
 bool Parser::isAtEnd() {
     return this->current >= this->tokens.size() || this->peek().type == EOF_TOKEN;
